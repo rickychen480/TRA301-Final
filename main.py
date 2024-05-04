@@ -1,23 +1,21 @@
 from AutomaticDecrypter import AutomaticDecrypter
 
+def testSolver(text):
+    key, ptext, lang = AutomaticDecrypter(text).solve()
+    print(f"Ciphertext: {text}\n"
+          + f"Key: {key}\n"
+          + f"Possible Languages: {lang}\n"
+          + f"Plaintext: {ptext}\n")
 
-# TODO: Create CLI -> Gooey
+# TODO: Create CLI -> Gooey; Add substitution example
 if __name__ == "__main__":
-    ctext_en = "iypejagkmxhyvscditcznfivzlfghkhjvpfcplavrjlxiipbrxtmbvkejg"
-    ctext_fr = "migjfsikpldptczgpxucmvzeyfixdpeilcsqzxuiqxwedmftrmquniwgmwedoigdluigtugwjulxematxpx"
 
-    key, ptext, lang = AutomaticDecrypter(ctext_fr).solve()
-    print(f"""
-    Ciphertext: {ctext_fr}
-    Key: {key}
-    Language: {lang}
-    Plaintext: {ptext}
-    """)
 
-    key, ptext, lang = AutomaticDecrypter(ctext_en).solve()
-    print(f"""
-    Ciphertext: {ctext_en}
-    Key: {key}
-    Language: {lang}
-    Plaintext: {ptext}
-    """)
+    print("---------------Testing Multilingual Vigenere Ciphers---------------")
+    testSolver("migjfsikpldptczgpxucmvzeyfixdpeilcsqzxuiqxwedmftrmquniwgmwedoigdluigtugwjulxematxpx")
+    testSolver("vwmdxnraqfnncsswoijwdggijxilmeusdaeaqhmsgiuocdtmjviflajovalawstwfaqovknkdjqjmtjgcgetjaiztnuoraoiahbseadziethjb")
+    testSolver("iypejagkmxhyvscditcznfivzlfghkhjvpfcplavrjlxiipbrxtmbvkejg")
+
+    print("-------------Testing Multilingual Substitution Ciphers-------------")
+
+

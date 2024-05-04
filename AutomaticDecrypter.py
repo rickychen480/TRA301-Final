@@ -1,6 +1,6 @@
 from BigramFreqs import *
-from collections import Counter
 from cipher_solver.simple import SimpleSolver
+from collections import Counter
 from itertools import combinations
 from secretpy import Vigenere
 from sortedcontainers import SortedDict
@@ -14,17 +14,23 @@ class AutomaticDecrypter:
 
         self.ORIGINAL_TEXT = text
         self.N = n_grams
-        self.MAX_KEYLEN = max_keylen # len(self.ctext) // n_grams
-        self.IOC_THRESHOLD = 0.05
+        self.MAX_KEYLEN = max_keylen
+        self.IC_THRESHOLD = 0.06
 
         self.ALPHABET = string.ascii_lowercase
+        self.SUPPORTED_LANGS_FREQS = (
+            BigramFreqs.EN,
+            BigramFreqs.ES,
+            BigramFreqs.FI,
+            BigramFreqs.FR,
+        )
 
     def solve(self):
         ptext = None
         key = "[NO KEY]"
 
         # Is the cipher text monoalphabetic or polyalphabetic?
-        if self.index_of_coincidence(self.ctext) < self.IOC_THRESHOLD:
+        if self.index_of_coincidence(self.ctext) < self.IC_THRESHOLD:
             # Polyalphabetic cipher
             key, ptext = self.kasiski()
         else:
@@ -78,40 +84,40 @@ class AutomaticDecrypter:
             keys_to_ptext[top_key] = Vigenere().decrypt(self.ctext, top_key)
 
         best_solve = None
-        best_ioc = 0
+        best_ic = 0
         for key, ptext in keys_to_ptext.items():
-            if (ioc := self.index_of_coincidence(ptext)) > best_ioc:
+            if (ic := self.index_of_coincidence(ptext)) > best_ic:
                 best_solve = (key, ptext)
-                best_ioc = ioc
+                best_ic = ic
 
         return best_solve
 
     def substitution(self):
+        # TODO: Implement hill-climbing solver with multilingual frequencies
         solver = SimpleSolver(self.ORIGINAL_TEXT)
         solver.solve()
         return solver.plaintext()
 
     def best_langs(self, text=None):
         """Returns best fitting languages from index of coincidence"""
-        # Margin of error for IOC
-        IOC_TOLERANCE = 0.012
+        # Margin of error for IC
+        IC_TOLERANCE = 0.012
         # Dict of language to avg index of coincidence, sorted from min to max
-        IOC_TO_LANG = SortedDict({
+        IC_TO_LANG = SortedDict({
             0.0667: "EN",
+            0.0748: "ES",
             0.0778: "FR",
+            0.0820: "FI",
         })
 
         if text is None:
             text = self.ctext
 
-        # Does input represent cleartext?
-        if (ioc := self.index_of_coincidence(text)) < self.IOC_THRESHOLD:
-            return None
-
+        ic = self.index_of_coincidence(text)
         best_langs = [
-            IOC_TO_LANG[key]
-            for key in IOC_TO_LANG.irange(ioc - IOC_TOLERANCE,
-                                          ioc + IOC_TOLERANCE)
+            IC_TO_LANG[key]
+            for key in IC_TO_LANG.irange(ic - IC_TOLERANCE,
+                                          ic + IC_TOLERANCE)
         ]
 
         return best_langs
